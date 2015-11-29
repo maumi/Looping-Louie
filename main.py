@@ -10,18 +10,20 @@ clockwise = 1
 lock = Lock()
 button_active = False
 boost_active = False
+game_running = True
+
+#vor 
+Motor1A = 16
+#zurueck
+Motor1B = 18
+#an
+Motor1E = 22
+
+GPIO.setmode(GPIO.BOARD)
 
 def inits(): 
 	#Nummerierung wie PINS auf dem Board
-	GPIO.setmode(GPIO.BOARD)
-
-	global Motor1A, Motor1B, Motor1E
-	#vor 
-	Motor1A = 16
-	#zurueck
-	Motor1B = 18
-	#an
-	Motor1E = 22
+	#GPIO.setmode(GPIO.BOARD)
 
 	#alles ausgaenge 
 	GPIO.setup(Motor1A,GPIO.OUT)
@@ -39,62 +41,310 @@ def inits():
 	pwm1B.start( 0 )
 
 def button_init():
-	GPIO.setmode(GPIO.BOARD)
+	#GPIO.setmode(GPIO.BOARD)
 
+	# Die 9 LEDs raussuchen und ausschalten
 	GPIO.setup(11, GPIO.OUT)
 	GPIO.output(11, False)  
+	
+	# Die 9 Buttons als Eingaenge
 	GPIO.setup(13, GPIO.IN)
+		
+def boost_wait_b0():
+	while True:
+		sleep(randint(10,20))
+		# LED von Taster 0 aktivieren
+		
+		# Button Boost Thread aktivieren
+		t = Thread(target=pressed_b0, args=())
+		t.daemon = True
+		t.start()
+		t.join()
+		
+def boost_wait_b1():
+	while True:
+		sleep(randint(10,20))
+		# LED von Taster 0 aktivieren
+		
+		# Button Boost Thread aktivieren
+		t = Thread(target=pressed_b1, args=())
+		t.daemon = True
+		t.start()
+		t.join()
 
-def button_wait():
-	global button_active
+		
+def boost_wait_b2():
+	while True:
+		sleep(randint(10,20))
+		# LED von Taster 0 aktivieren
+		
+		# Button Boost Thread aktivieren
+		t = Thread(target=pressed_b2, args=())
+		t.daemon = True
+		t.start()
+		t.join()
+
+		
+def boost_wait_b3():
+	while True:
+		sleep(randint(10,20))
+		# LED von Taster 0 aktivieren
+		
+		# Button Boost Thread aktivieren
+		t = Thread(target=pressed_b3, args=())
+		t.daemon = True
+		t.start()
+		t.join()
+		
+def boost_wait_b4():
+	while True:
+		sleep(randint(10,20))
+		# LED von Taster 0 aktivieren
+		
+		# Button Boost Thread aktivieren
+		t = Thread(target=pressed_b4, args=())
+		t.daemon = True
+		t.start()
+		t.join()
+		
+def boost_wait_b5():
+	while True:
+		sleep(randint(10,20))
+		# LED von Taster 0 aktivieren
+		
+		# Button Boost Thread aktivieren
+		t = Thread(target=pressed_b5, args=())
+		t.daemon = True
+		t.start()
+		t.join()
+		
+def boost_wait_b6():
+	while True:
+		sleep(randint(10,20))
+		# LED von Taster 0 aktivieren
+		
+		# Button Boost Thread aktivieren
+		t = Thread(target=pressed_b6, args=())
+		t.daemon = True
+		t.start()
+		t.join()
+			
+def boost_wait_b7():
+	while True:
+		sleep(randint(10,20))
+		# LED von Taster 0 aktivieren
+		
+		# Button Boost Thread aktivieren
+		t = Thread(target=pressed_b7, args=())
+		t.daemon = True
+		t.start()
+		t.join()
+	
+def pressed_b0():
 	global boost_active
-	button_init()
-	while True:                     
-        	if not (GPIO.input(13)) and button_active:      
-                	GPIO.output(11, False)
-                	sleep(.1)       
-                	GPIO.output(11, True)
-                	sleep(.1)        
-                	GPIO.output(11, False)
-                	sleep(.1)       
-                	GPIO.output(11, True)
-  			#boost anschalten 
-			boost_active = True			
-			#dann knopf deaktivieren
-			button_active = False
-			GPIO.output(11, False) 
-			sleep(5)
-			boost_active = False
-
-def boost_wait():
-	global button_active
+	#button_init()
+	button_gpio = 11
+	if boost_active:
+		#LED aus
+		GPIO.output(button_gpio, False)	
+		return
 	while True:
-		sleep(10)
-		GPIO.output(11, True)
-		button_active = True
-
-"""
-def forward():
-	inits()
+		if not (GPIO.input(button_gpio)):			
+			boost_active = True	
+        	GPIO.output(button_gpio, False)
+        	sleep(.2)       
+        	GPIO.output(button_gpio, True)
+        	sleep(.2)        
+        	GPIO.output(button_gpio, False)
+        	sleep(.2)       
+        	GPIO.output(button_gpio, True)			
+        	sleep(.2)        
+        	GPIO.output(button_gpio, False)		
+        sleep(.1)
+        
+def pressed_b1():
+	global boost_active
+	#button_init()
+	button_gpio = 11
+	if boost_active:
+		#LED aus
+		GPIO.output(button_gpio, False)	
+		return
 	while True:
-		with lock:
-			pwm1A .ChangeDutyCycle(speed)
-			pwm1B .ChangeDutyCycle(0)
-			print "Going forwards with ", speed, "%"
-		GPIO.output(Motor1A,GPIO.HIGH)
-		GPIO.output(Motor1B,GPIO.LOW)
-		GPIO.output(Motor1E,GPIO.HIGH)
-		sleep(1)	
+		if not (GPIO.input(button_gpio)):			
+			boost_active = True	
+        	GPIO.output(button_gpio, False)
+        	sleep(.2)       
+        	GPIO.output(button_gpio, True)
+        	sleep(.2)        
+        	GPIO.output(button_gpio, False)
+        	sleep(.2)       
+        	GPIO.output(button_gpio, True)			
+        	sleep(.2)        
+        	GPIO.output(button_gpio, False)		
+        sleep(.1)
+        
+def pressed_b2():
+	global boost_active
+	#button_init()
+	button_gpio = 11
+	if boost_active:
+		#LED aus
+		GPIO.output(button_gpio, False)	
+		return
+	while True:
+		if not (GPIO.input(button_gpio)):			
+			boost_active = True	
+        	GPIO.output(button_gpio, False)
+        	sleep(.2)       
+        	GPIO.output(button_gpio, True)
+        	sleep(.2)        
+        	GPIO.output(button_gpio, False)
+        	sleep(.2)       
+        	GPIO.output(button_gpio, True)			
+        	sleep(.2)        
+        	GPIO.output(button_gpio, False)		
+        sleep(.1)
 
-def backward(speed): 
-        pwm1A .ChangeDutyCycle(0)                                            
-        pwm1B .ChangeDutyCycle(speed) 
-	print "Going backwards with ", speed, "%"
-	GPIO.output(Motor1A,GPIO.LOW)
-	GPIO.output(Motor1B,GPIO.HIGH)
-	GPIO.output(Motor1E,GPIO.HIGH)
-	sleep(6)	
-"""
+def pressed_b3():
+	global boost_active
+	#button_init()
+	button_gpio = 11
+	if boost_active:
+		#LED aus
+		GPIO.output(button_gpio, False)	
+		return
+	while True:
+		if not (GPIO.input(button_gpio)):			
+			boost_active = True	
+        	GPIO.output(button_gpio, False)
+        	sleep(.2)       
+        	GPIO.output(button_gpio, True)
+        	sleep(.2)        
+        	GPIO.output(button_gpio, False)
+        	sleep(.2)       
+        	GPIO.output(button_gpio, True)			
+        	sleep(.2)        
+        	GPIO.output(button_gpio, False)		
+        sleep(.1)
+
+def pressed_b4():
+	global boost_active
+	#button_init()
+	button_gpio = 11
+	if boost_active:
+		#LED aus
+		GPIO.output(button_gpio, False)	
+		return
+	while True:
+		if not (GPIO.input(button_gpio)):			
+			boost_active = True	
+        	GPIO.output(button_gpio, False)
+        	sleep(.2)       
+        	GPIO.output(button_gpio, True)
+        	sleep(.2)        
+        	GPIO.output(button_gpio, False)
+        	sleep(.2)       
+        	GPIO.output(button_gpio, True)			
+        	sleep(.2)        
+        	GPIO.output(button_gpio, False)		
+        sleep(.1)
+
+def pressed_b5():
+	global boost_active
+	#button_init()
+	button_gpio = 11
+	if boost_active:
+		#LED aus
+		GPIO.output(button_gpio, False)	
+		return
+	while True:
+		if not (GPIO.input(button_gpio)):			
+			boost_active = True	
+        	GPIO.output(button_gpio, False)
+        	sleep(.2)       
+        	GPIO.output(button_gpio, True)
+        	sleep(.2)        
+        	GPIO.output(button_gpio, False)
+        	sleep(.2)       
+        	GPIO.output(button_gpio, True)			
+        	sleep(.2)        
+        	GPIO.output(button_gpio, False)		
+        sleep(.1)
+        
+def pressed_b6():
+	global boost_active
+	#button_init()
+	button_gpio = 11
+	if boost_active:
+		#LED aus
+		GPIO.output(button_gpio, False)	
+		return
+	while True:
+		if not (GPIO.input(button_gpio)):			
+			boost_active = True	
+        	GPIO.output(button_gpio, False)
+        	sleep(.2)       
+        	GPIO.output(button_gpio, True)
+        	sleep(.2)        
+        	GPIO.output(button_gpio, False)
+        	sleep(.2)       
+        	GPIO.output(button_gpio, True)			
+        	sleep(.2)        
+        	GPIO.output(button_gpio, False)		
+        sleep(.1)
+        
+def pressed_b7():
+	global boost_active
+	#button_init()
+	button_gpio = 11
+	if boost_active:
+		#LED aus
+		GPIO.output(button_gpio, False)	
+		return
+	while True:
+		if not (GPIO.input(button_gpio)):			
+			boost_active = True	
+        	GPIO.output(button_gpio, False)
+        	sleep(.2)       
+        	GPIO.output(button_gpio, True)
+        	sleep(.2)        
+        	GPIO.output(button_gpio, False)
+        	sleep(.2)       
+        	GPIO.output(button_gpio, True)			
+        	sleep(.2)        
+        	GPIO.output(button_gpio, False)		
+        sleep(.1)
+        
+def pressed_bstart():
+	global game_running
+	#button_init()
+	GPIO.setup(11, GPIO.OUT)
+	button_gpio = 11
+	while True:
+		if not (GPIO.input(button_gpio)):	
+			if game_running:	
+				#Spiel stoppen
+				return
+			elif not game_running:
+				#Spiel Starten
+				t_game = Thread(target=running, args=())
+				t_game.daemon = True
+				t_game.start()
+				game_running = True
+
+			
+        	GPIO.output(button_gpio, False)
+        	sleep(.2)       
+        	GPIO.output(button_gpio, True)
+        	sleep(.2)        
+        	GPIO.output(button_gpio, False)
+        	sleep(.2)       
+        	GPIO.output(button_gpio, True)			
+        	sleep(.2)        
+        	GPIO.output(button_gpio, False)	
+        	
+        sleep(.1)
 
 def running():
 	inits()
@@ -128,32 +378,28 @@ def running():
 		sleep(.1)
 
 def end(): 
+	global Motor1E
 	print "Now stop"
 	GPIO.output(Motor1E,GPIO.LOW)
 	pwm1A.stop()
 	pwm1B.stop()
 	GPIO.cleanup()
 
+
 def change_speed():
 	global speed
 	while True:
 		#with lock:
-		speed = randint(0,100)
+		speed = randint(0,80)
 		print "Speed im Thread ist", speed
-		#sleep(2)
 		sleep(randint(2,10))
 
 def change_direction():
 	global clockwise
         while True:                
                 clockwise = randint(0,1)
-		#sleep(4)
-                sleep(randint(2,10))
-
-t = Thread(target=running, args=())
-t.daemon = True
-t.start()
-
+                sleep(randint(4,10))
+                
 t_speed = Thread(target=change_speed, args=())
 t_speed.daemon = True
 t_speed.start()
@@ -162,14 +408,17 @@ t_direc = Thread(target=change_direction, args=())
 t_direc.daemon = True   
 t_direc.start()       
 
-t_button_wait = Thread(target=button_wait, args=())                                 
-t_button_wait.daemon = True                                                          
-t_button_wait.start()                  
+while True:
+	t = Thread(target=pressed_bstart, args=())
+	t.daemon = True
+	t.start()
+	t.join()
+	
+	#Stop gedrueckt
+	#aufraeumen
+	#end()
+	#wieder neu starten und warten
 
-t_boost_wait = Thread(target=boost_wait, args=())                             
-t_boost_wait.daemon = True                                                     
-t_boost_wait.start()  
 
-sleep(20)
+#sleep(20)
 end()
-
