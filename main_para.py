@@ -3,6 +3,7 @@ import smbus
 from time import sleep
 from random import randrange,randint
 from threading import Thread,Lock
+from multiprocessing import Process
 
 #global speed
 speed = 20
@@ -43,8 +44,8 @@ B2 = 33
 B3 = 31
 B4 = 29
 B5 = 36
-B6 = 38
-B7 = 40
+B6 = 40
+B7 = 38
 B8 = 37 
 
 GPIO.setmode(GPIO.BOARD)
@@ -89,111 +90,116 @@ def button_init():
 def boost_wait_b0():
 	global smbus,hexe,game_running
 	while True:
-		sleep(5)
-		#sleep(randint(20,50))
+		#sleep(5)
+		sleep(randint(20,50))
 		# LED von Taster 0 aktivieren
+		lock.acquire()
 		hexe = hexe+0x10
 		smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
+		lock.release()
 		print "b1 ready"
 		# Button Boost Thread aktivieren
-		t = Thread(target=pressed_b0, args=())
-		t.daemon = True
+		t = Process(target=pressed_b0, args=())
+		#t.daemon = True
 		t.start()
 		t.join()
 		sleep(.01)
 		
 def boost_wait_b1():
-	global hexe,smbus
+	global hexe,smbus,game_running
 	while True:
 		sleep(randint(20,50))
 		# LED von Taster 0 aktivieren
+		lock.acquire()
 		hexe = hexe+0x20
 		smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
+		lock.release()
 		# Button Boost Thread aktivieren
 		t = Thread(target=pressed_b1, args=())
-		t.daemon = True
+		#t.daemon = True
 		t.start()
 		t.join()
 		sleep(.01)
 		
 def boost_wait_b2():
-	global hexe,smbus
+	global hexe,smbus,game_running
 	while True:
-		if not game_running:
-			return
 		sleep(randint(20,50))
 		# LED von Taster 0 aktivieren
+		lock.acquire()
 		hexe = hexe+0x40
 		smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
+		lock.release()
 		# Button Boost Thread aktivieren
 		t = Thread(target=pressed_b2, args=())
-		t.daemon = True
+		#t.daemon = True
 		t.start()
 		t.join()
 		sleep(.01)
 
 		
 def boost_wait_b3():
-	global hexe,smbus
+	global hexe,smbus,game_running
 	while True:
-		if not game_running:
-			return
 		sleep(randint(20,50))
 		# LED von Taster 0 aktivieren
+		lock.acquire()
 		hexe = hexe+0x80
 		smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
+		lock.release()
 		# Button Boost Thread aktivieren
 		t = Thread(target=pressed_b3, args=())
-		t.daemon = True
+		#t.daemon = True
 		t.start()
 		t.join()
 		sleep(.01)
 		
 def boost_wait_b4():
-	global hexe,smbus
+	global hexe,smbus,game_running
 	while True:
-		if not game_running:
-			return
 		sleep(randint(20,50))
 		# LED von Taster 0 aktivieren
+		lock.acquire()
 		hexe = hexe+0x01
 		smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
+		lock.release()
 		# Button Boost Thread aktivieren
 		t = Thread(target=pressed_b4, args=())
-		t.daemon = True
+		#t.daemon = True
 		t.start()
 		t.join()
 		sleep(.01)
 		
 def boost_wait_b5():
-	global hexe,smbus
+	global hexe,smbus,game_running
 	while True:
-		if not game_running:
-			return
 		sleep(randint(20,50))
+		#sleep(5)
 		print "b6 ready"
 		# LED von Taster 0 aktivieren
-		hexe = hexe+0x02
+		lock.acquire()
+		hexe = hexe+0x04
 		smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
+		lock.release()
 		# Button Boost Thread aktivieren
 		t = Thread(target=pressed_b5, args=())
-		t.daemon = True
+		#t.daemon = True
 		t.start()
 		t.join()
 		sleep(.01)
 		
 def boost_wait_b6():
-	global hexe,smbus
+	global hexe,smbus,game_running
 	while True:
-		if not game_running:
-			return
 		sleep(randint(20,50))
 		# LED von Taster 0 aktivieren
-		hexe = hexe+0x04
+		lock.acquire()
+		hexe = hexe+0x02
 		smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
+		lock.release()
 		# Button Boost Thread aktivieren
 		t = Thread(target=pressed_b6, args=())
-		t.daemon = True
+		#t.daemon = True
 		t.start()
 		t.join()
 		sleep(.01)
@@ -201,15 +207,15 @@ def boost_wait_b6():
 def boost_wait_b7():
 	global hexe,smbus,game_running
 	while True:
-		if not game_running:
-			return
 		sleep(randint(20,50))
 		# LED von Taster 0 aktivieren
+		lock.acquire()
 		hexe = hexe+0x08
 		smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
+		lock.release()
 		# Button Boost Thread aktivieren
 		t = Thread(target=pressed_b7, args=())
-		t.daemon = True
+		#t.daemon = True
 		t.start()
 		t.join()
 		sleep(.01)
@@ -222,7 +228,9 @@ def pressed_b0():
 		if not (GPIO.input(B1)):			
 			boost_active = True	
 			print "b1 pressed"
+			lock.acquire()
 			hexe = hexe - 0x10
+			lock.release()
 			smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
 			#3x aufblinken
 			smbus.write_byte_data(0x20,0x14,hexe+0x10) # Bank B alle aus
@@ -241,11 +249,15 @@ def pressed_b0():
 		sleep(0.01)
         
 def pressed_b1():
-	global boost_active,smbus,B2,hexe
+	global boost_active,smbus,B2,hexe,game_running
 	while True:
+		if not game_running:
+			return
 		if not (GPIO.input(B2)):			
 			boost_active = True	
+			lock.acquire()
 			hexe = hexe - 0x20
+			lock.release()
 			smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
 			#3x aufblinken
 			smbus.write_byte_data(0x20,0x14,hexe+0x20) # Bank B alle aus
@@ -264,11 +276,15 @@ def pressed_b1():
 		sleep(0.01)
         
 def pressed_b2():
-	global boost_active,smbus,B3,hexe
+	global boost_active,smbus,B3,hexe,game_running
 	while True:
+		if not game_running:
+			return
 		if not (GPIO.input(B3)):			
 			boost_active = True	
+			lock.acquire()
 			hexe = hexe - 0x40
+			lock.release()
 			smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
 			#3x aufblinken
 			smbus.write_byte_data(0x20,0x14,hexe+0x40) # Bank B alle aus
@@ -287,13 +303,17 @@ def pressed_b2():
 		sleep(0.01)
         
 def pressed_b3():
-	global boost_active,smbus,B4,hexe
+	global boost_active,smbus,B4,hexe,game_running
 	#button_init()
 	#button_gpio = 11
 	while True:
+		if not game_running:
+			return
 		if not (GPIO.input(B4)):			
 			boost_active = True	
+			lock.acquire()
 			hexe = hexe - 0x80
+			lock.release()
 			smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
 			#3x aufblinken
 			smbus.write_byte_data(0x20,0x14,hexe+0x80) # Bank B alle aus
@@ -312,13 +332,17 @@ def pressed_b3():
 		sleep(0.01)
         
 def pressed_b4():
-	global boost_active,smbus,B5,hexe
+	global boost_active,smbus,B5,hexe,game_running
 	#button_init()
 	#button_gpio = 11
 	while True:
+		if not game_running:
+			return
 		if not (GPIO.input(B5)):			
 			boost_active = True	
+			lock.acquire()
 			hexe = hexe - 0x01
+			lock.release()
 			smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
 			#3x aufblinken
 			smbus.write_byte_data(0x20,0x14,hexe+0x01) # Bank B alle aus
@@ -337,24 +361,31 @@ def pressed_b4():
 		sleep(0.01)
         
 def pressed_b5():
-	global boost_active,smbus,B6,hexe
+	global boost_active,smbus,B6,hexe,game_running
 	#button_init()
 	#button_gpio = 11
 	while True:
+		if not game_running:
+			return
 		if not (GPIO.input(B6)):			
 			boost_active = True	
-			hexe = hexe - 0x02
+			lock.acquire()
+			hexe = hexe - 0x04
+			lock.release()
 			smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
 			#3x aufblinken
-			smbus.write_byte_data(0x20,0x14,hexe+0x02) # Bank B alle aus
+			print "bling"
+			smbus.write_byte_data(0x20,0x14,hexe+0x04) # Bank B alle aus
 			sleep(.3)
 			smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
 			sleep(.3)
-			smbus.write_byte_data(0x20,0x14,hexe+0x02) # Bank B alle aus
+			print "bling"
+			smbus.write_byte_data(0x20,0x14,hexe+0x04) # Bank B alle aus
 			sleep(.3)
 			smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
 			sleep(.3)
-			smbus.write_byte_data(0x20,0x14,hexe+0x02) # Bank B alle aus
+			print "bling"
+			smbus.write_byte_data(0x20,0x14,hexe+0x04) # Bank B alle aus
 			sleep(.3)
 			smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
 			sleep(2)
@@ -362,26 +393,26 @@ def pressed_b5():
 		sleep(0.01)
         
 def pressed_b6():
-	global boost_active,smbus,B7,hexe
-	#button_init()
-	#button_gpio = 11
+	global boost_active,smbus,B7,hexe,game_running
 	while True:
+		if not game_running:
+			return
 		if not (GPIO.input(B7)):			
 			boost_active = True	
-			hexe = hexe - 0x04
+			lock.acquire()
+			hexe = hexe - 0x02
+			lock.release()
 			smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
-			sleep(2)
-			return
 			#3x aufblinken
-			smbus.write_byte_data(0x20,0x14,hexe+0x04) # Bank B alle aus
+			smbus.write_byte_data(0x20,0x14,hexe+0x02) # Bank B alle aus
 			sleep(.3)
 			smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
 			sleep(.3)
-			smbus.write_byte_data(0x20,0x14,hexe+0x04) # Bank B alle aus
+			smbus.write_byte_data(0x20,0x14,hexe+0x02) # Bank B alle aus
 			sleep(.3)
 			smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
 			sleep(.3)
-			smbus.write_byte_data(0x20,0x14,hexe+0x04) # Bank B alle aus
+			smbus.write_byte_data(0x20,0x14,hexe+0x02) # Bank B alle aus
 			sleep(.3)
 			smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
 			sleep(2)
@@ -389,13 +420,17 @@ def pressed_b6():
 		sleep(0.01)
         
 def pressed_b7():
-	global boost_active,smbus,B8,hexe
+	global boost_active,smbus,B8,hexe,game_running
 	#button_init()
 	#button_gpio = 11
 	while True:
+		if not game_running:
+			return
 		if not (GPIO.input(B8)):			
 			boost_active = True	
+			lock.acquire()
 			hexe = hexe - 0x08
+			lock.release()
 			smbus.write_byte_data(0x20,0x14,hexe) # Bank B alle aus
 			#3x aufblinken
 			smbus.write_byte_data(0x20,0x14,hexe+0x08) # Bank B alle aus
@@ -414,7 +449,7 @@ def pressed_b7():
 		sleep(0.01)
         
 def pressed_bstart():
-	global game_running,Bs,smbus
+	global game_running,Bs,smbus,hexe
 	button_init()
 	#print "bstart"
 	GPIO.setup(Bs, GPIO.IN)
@@ -424,31 +459,27 @@ def pressed_bstart():
 			if game_running:	
 				#Spiel stoppen
 				print "stop game"
+				lock.acquire()
 				smbus.write_byte_data(0x20,0x15,0x00) # Start LED aus
+				hexe = 0x00
+				lock.release()
 				game_running = False
 				sleep(2)
 				return
 			elif not game_running:
 				#Spiel Starten
 				print "start game"
+				lock.acquire()
+				#hexe = 0x00
 				smbus.write_byte_data(0x20,0x15,0x01) # Start LED an	
-				t_game = Thread(target=running, args=())
-				t_game.daemon = True
-				t_game.start()
+				lock.release()
+				t_game = Process(target=running, args=())
 				game_running = True
+				#t_game.daemon = True
+				t_game.start()
 				sleep(2)
 			
-        	#GPIO.output(button_gpio, False)
-        	#sleep(.2)       
-        	#GPIO.output(button_gpio, True)
-        	#sleep(.2)        
-        	#GPIO.output(button_gpio, False)
-        	#sleep(.2)       
-        	#GPIO.output(button_gpio, True)			
-        	#sleep(.2)        
-        	#GPIO.output(button_gpio, False)	
-        	
-        sleep(.01)
+       	 	sleep(.01)
 
 def running():
 	#inits()
@@ -458,36 +489,36 @@ def running():
 
 
 	#Button warter starten
-	tb0 = Thread(target=boost_wait_b0, args=())
-	tb0.daemon = True
+	tb0 = Process(target=boost_wait_b0, args=())
+	#tb0.daemon = True
 	tb0.start()
 
-	tb1 = Thread(target=boost_wait_b1, args=())
-	tb1.daemon = True
+	tb1 = Process(target=boost_wait_b1, args=())
+	#tb1.daemon = True
 	tb1.start()
 
-	tb2 = Thread(target=boost_wait_b2, args=())
-	tb2.daemon = True
+	tb2 = Process(target=boost_wait_b2, args=())
+	#tb2.daemon = True
 	tb2.start()
 
-	tb3 = Thread(target=boost_wait_b3, args=())
-	tb3.daemon = True
+	tb3 = Process(target=boost_wait_b3, args=())
+	#tb3.daemon = True
 	tb3.start()
 
-	tb4 = Thread(target=boost_wait_b4, args=())
-	tb4.daemon = True
+	tb4 = Process(target=boost_wait_b4, args=())
+	#tb4.daemon = True
 	tb4.start()
 
-	tb5 = Thread(target=boost_wait_b5, args=())
-	tb5.daemon = True
+	tb5 = Process(target=boost_wait_b5, args=())
+	#tb5.daemon = True
 	tb5.start()
 
-	tb6 = Thread(target=boost_wait_b6, args=())
-	tb6.daemon = True
+	tb6 = Process(target=boost_wait_b6, args=())
+	#tb6.daemon = True
 	tb6.start()
 
-	tb7 = Thread(target=boost_wait_b7, args=())
-	tb7.daemon = True
+	tb7 = Process(target=boost_wait_b7, args=())
+	#tb7.daemon = True
 	tb7.start()
 
 	while True:
@@ -495,6 +526,14 @@ def running():
 			print "hoer auf"
 			pwm1A .ChangeDutyCycle(0)
 			pwm1B .ChangeDutyCycle(0)
+			tb0.terminate()
+			tb1.terminate()
+			tb2.terminate()
+			tb3.terminate()
+			tb4.terminate()
+			tb5.terminate()
+			tb6.terminate()
+			tb7.terminate()
 			return
 		if clockwise == 5:
         	       	pwm1B .ChangeDutyCycle(0)                                        
@@ -532,39 +571,40 @@ def end():
 	GPIO.cleanup()
 
 def change_speed():
-	global speed
+	global speed, hexe
 	while True:
 		#with lock:
-		speed = randint(20,60)
+		speed = randint(25,50)
 		print "Speed im Thread ist", speed
+		print "hexe ist", hexe
 		sleep(randint(2,10))
 
 def change_direction():
 	global clockwise
         while True:                
-			clockwise = randint(0,10)
-			if clockwise == 5:
-				print "rueck" , clockwise
-				sleep(randint(5,10))
-			else:
-				print "vor", clockwise
-                sleep(randint(10,20))
+		clockwise = randint(0,10)
+		if clockwise == 5:
+			print "rueck" , clockwise
+			sleep(randint(5,10))
+		else:
+			print "vor", clockwise
+                	sleep(randint(10,20))
                 
-t_speed = Thread(target=change_speed, args=())
+t_speed = Process(target=change_speed, args=())
 t_speed.daemon = True
 t_speed.start()
 
-t_direc = Thread(target=change_direction, args=())
+t_direc = Process(target=change_direction, args=())
 t_direc.daemon = True   
 t_direc.start()       
 
 while True:
-	t = Thread(target=pressed_bstart, args=())
-	t.daemon = True
+	t = Process(target=pressed_bstart, args=())
+	#t.daemon = True
 	t.start()
 	t.join()
 	print "stop gedrueckt"
-	sleep(.1)
+	sleep(.01)
 	
 	smbus.write_byte_data(0x20,0x14,0x00) # Bank A alle aus
 	
