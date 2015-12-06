@@ -1,9 +1,5 @@
-#!/usr/bin/python
-
 import RPi.GPIO as GPIO
 import smbus
-import signal
-import sys
 from time import sleep
 from random import randrange,randint
 from threading import Thread,Lock
@@ -13,9 +9,9 @@ speed = 20
 #global clockwise
 clockwise = 1
 lock = Lock()
-#button_active = False
+button_active = False
 boost_active = False
-#game_running = False
+game_running = False
 
 #global hex led
 hexe = 0x00
@@ -41,7 +37,7 @@ Motor1E = 22
 #B8 GPA3 0x08
 
 #Taster
-#Bs = 32
+Bs = 32
 B1 = 35
 B2 = 33
 B3 = 31
@@ -50,8 +46,6 @@ B5 = 36
 B6 = 38
 B7 = 40
 B8 = 37 
-
-signal.signal(signal.SIGTERM, sigterm_handler)
 
 GPIO.setmode(GPIO.BOARD)
 
@@ -77,12 +71,12 @@ def button_init():
 	#GPIO.setup(B1, GPIO.OUT)
 	#GPIO.output(B1, False)
 	smbus.write_byte_data(0x20,0x00,0x00) # Bank A Ausgang
-	#smbus.write_byte_data(0x20,0x01,0x00) # Bank B Ausgang
+	smbus.write_byte_data(0x20,0x01,0x00) # Bank B Ausgang
 	smbus.write_byte_data(0x20,0x14,0x00) # Bank A alle aus
-	#smbus.write_byte_data(0x20,0x15,0x00) # Bank B alle aus
+	smbus.write_byte_data(0x20,0x15,0x00) # Bank B alle aus
 	
 	# Die 9 Buttons als Eingaenge
-	#GPIO.setup(Bs, GPIO.IN)
+	GPIO.setup(Bs, GPIO.IN)
 	GPIO.setup(B1, GPIO.IN)
 	GPIO.setup(B2, GPIO.IN)
 	GPIO.setup(B3, GPIO.IN)
@@ -93,7 +87,7 @@ def button_init():
 	GPIO.setup(B8, GPIO.IN)
 		
 def boost_wait_b0():
-	global smbus,hexe
+	global smbus,hexe,game_running
 	while True:
 		sleep(5)
 		#sleep(randint(20,50))
@@ -125,6 +119,8 @@ def boost_wait_b1():
 def boost_wait_b2():
 	global hexe,smbus
 	while True:
+		if not game_running:
+			return
 		sleep(randint(20,50))
 		# LED von Taster 0 aktivieren
 		hexe = hexe+0x40
@@ -172,6 +168,8 @@ def boost_wait_b4():
 def boost_wait_b5():
 	global hexe,smbus
 	while True:
+		if not game_running:
+			return
 		sleep(randint(20,50))
 		print "b6 ready"
 		# LED von Taster 0 aktivieren
@@ -187,6 +185,8 @@ def boost_wait_b5():
 def boost_wait_b6():
 	global hexe,smbus
 	while True:
+		if not game_running:
+			return
 		sleep(randint(20,50))
 		# LED von Taster 0 aktivieren
 		hexe = hexe+0x04
@@ -199,8 +199,10 @@ def boost_wait_b6():
 		sleep(.01)
 			
 def boost_wait_b7():
-	global hexe,smbus
+	global hexe,smbus,game_running
 	while True:
+		if not game_running:
+			return
 		sleep(randint(20,50))
 		# LED von Taster 0 aktivieren
 		hexe = hexe+0x08
@@ -213,8 +215,10 @@ def boost_wait_b7():
 		sleep(.01)
 	
 def pressed_b0():
-	global boost_active,smbus,B1,hexe
+	global boost_active,smbus,B1,hexe,game_running
 	while True:
+		if not game_running:
+			return
 		if not (GPIO.input(B1)):			
 			boost_active = True	
 			print "b1 pressed"
@@ -284,6 +288,8 @@ def pressed_b2():
         
 def pressed_b3():
 	global boost_active,smbus,B4,hexe
+	#button_init()
+	#button_gpio = 11
 	while True:
 		if not (GPIO.input(B4)):			
 			boost_active = True	
@@ -307,6 +313,8 @@ def pressed_b3():
         
 def pressed_b4():
 	global boost_active,smbus,B5,hexe
+	#button_init()
+	#button_gpio = 11
 	while True:
 		if not (GPIO.input(B5)):			
 			boost_active = True	
@@ -330,6 +338,8 @@ def pressed_b4():
         
 def pressed_b5():
 	global boost_active,smbus,B6,hexe
+	#button_init()
+	#button_gpio = 11
 	while True:
 		if not (GPIO.input(B6)):			
 			boost_active = True	
@@ -353,6 +363,8 @@ def pressed_b5():
         
 def pressed_b6():
 	global boost_active,smbus,B7,hexe
+	#button_init()
+	#button_gpio = 11
 	while True:
 		if not (GPIO.input(B7)):			
 			boost_active = True	
@@ -378,6 +390,8 @@ def pressed_b6():
         
 def pressed_b7():
 	global boost_active,smbus,B8,hexe
+	#button_init()
+	#button_gpio = 11
 	while True:
 		if not (GPIO.input(B8)):			
 			boost_active = True	
@@ -399,30 +413,48 @@ def pressed_b7():
 			return
 		sleep(0.01)
         
-"""
 def pressed_bstart():
-	global Bs,smbus
+	global game_running,Bs,smbus
 	button_init()
 	#print "bstart"
 	GPIO.setup(Bs, GPIO.IN)
 	#button_gpio = 11
 	while True:
 		if not (GPIO.input(Bs)):	
-			#Spiel Starten
-			print "start game"
-			t_game = Thread(target=running, args=())
-			t_game.daemon = True
-			t_game.start()
-			sleep(2)
+			if game_running:	
+				#Spiel stoppen
+				print "stop game"
+				smbus.write_byte_data(0x20,0x15,0x00) # Start LED aus
+				game_running = False
+				sleep(2)
+				return
+			elif not game_running:
+				#Spiel Starten
+				print "start game"
+				smbus.write_byte_data(0x20,0x15,0x01) # Start LED an	
+				t_game = Thread(target=running, args=())
+				t_game.daemon = True
+				t_game.start()
+				game_running = True
+				sleep(2)
+			
+        	#GPIO.output(button_gpio, False)
+        	#sleep(.2)       
+        	#GPIO.output(button_gpio, True)
+        	#sleep(.2)        
+        	#GPIO.output(button_gpio, False)
+        	#sleep(.2)       
+        	#GPIO.output(button_gpio, True)			
+        	#sleep(.2)        
+        	#GPIO.output(button_gpio, False)	
         	
         sleep(.01)
-"""
 
 def running():
 	#inits()
 
 	print "running"
-	global boost_active
+	global boost_active, game_running
 
 
 	#Button warter starten
@@ -459,6 +491,11 @@ def running():
 	tb7.start()
 
 	while True:
+		if not game_running:
+			print "hoer auf"
+			pwm1A .ChangeDutyCycle(0)
+			pwm1B .ChangeDutyCycle(0)
+			return
 		if clockwise == 5:
         	       	pwm1B .ChangeDutyCycle(0)                                        
 			if boost_active:
@@ -492,7 +529,6 @@ def end():
 	GPIO.output(Motor1E,GPIO.LOW)
 	pwm1A.stop()
 	pwm1B.stop()
-	smbus.write_byte_data(0x20,0x14,0x00) # Bank A alle aus
 	GPIO.cleanup()
 
 def change_speed():
@@ -522,28 +558,18 @@ t_direc = Thread(target=change_direction, args=())
 t_direc.daemon = True   
 t_direc.start()       
 
-def sigterm_handler(_signo, _stack_frame):
-    # Raises SystemExit(0):
-    sys.exit(0)
-    
-try:
-	running()
-
-finally:
-	end()
-
-"""
+while True:
 	t = Thread(target=pressed_bstart, args=())
 	t.daemon = True
 	t.start()
 	t.join()
 	print "stop gedrueckt"
 	sleep(.1)
-"""
-	#smbus.write_byte_data(0x20,0x14,0x00) # Bank A alle aus
+	
+	smbus.write_byte_data(0x20,0x14,0x00) # Bank A alle aus
 	
 	#Stop gedrueckt
 	#aufraeumen
 	#end()
 	#wieder neu starten und warten
-#end()
+end()
